@@ -26,6 +26,7 @@ local player = {}
 local blackies = {}
 local tappedpawn = nil
 local pawnToTake = nil
+local blockMessage = false
 turnText = {}
 local otherPlayers = {}
 local equaldice = false
@@ -86,10 +87,18 @@ function createplayer(player)
         circle.strokeWidth = 1
         table.insert(player,circle)
     end
+    print("sending info")
+    comms.sendinfo(player, false)
 end
 
 createplayer(player)
 
+local function paintTiles(pawn) 
+    for i, cell in ipairs(pawn.validmoves) do
+        print(cell)
+        globalboard[cell]:setFillColor(.35,.2,.86)
+    end
+end
 
 local function exitprison(player) --Salir de la prision
 
@@ -171,8 +180,6 @@ function restoreColourPlayer(player)
 end
 
 function playertap(event)
-
-    print("-->||", takePawn, "\t", player.out,"||<--")
     if takePawn and player.out then 
         restoreColourPlayer(player)
         pawnToTake = event.target
@@ -184,8 +191,13 @@ function playertap(event)
         end
         event.target.tapped = true 
         if event.target.out and player.out then
-            if player.rolled then
-                possibleMoves(event.target,diea, dieb)
+            if player.rolled and not blockMessage then
+                possiblestr = '"possibleMoves": true,'
+                pawnstr = '"pawn":' ..'"pawn' ..table.indexOf(player, event.target) .. '",'
+                dicestr = '"dice":[' .. diea ..',' .. dieb.. ']'
+                rollinfo = '{' .. possiblestr ..pawnstr .. dicestr .. '}'
+                comms.sendMessage(rollinfo)
+                blockMessage = true
                 tappedpawn = event.target
             end
         end
@@ -203,6 +215,7 @@ function tapListener(event)
                     tile = globalboard[cell]
                     if (event.target == tile) then
                         transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
+                        comms.sendinfo(player,false)
                         pawn.pos = cell
                         restoreColourBoard(pawn)
                         pawn.tapped = false
@@ -222,8 +235,7 @@ function tapListener(event)
                                 rolldice:setEnabled(true)
                                 player.rolled = false
                             else
-                                jailing = checkJailing(otherPlayers, player)
-                                comms.sendinfo(player, jailing)
+                                comms.sendinfo(player, true)
                                 for _, removePawn in ipairs(pawnsToRemove) do 
                                     pawnindex = table.indexOf(player, removePawn)
                                     table.remove(player, pawnindex)
@@ -277,12 +289,12 @@ local function roll( event )
                 player.rolled = true
                 rolldice:setEnabled(false)
             else 
-                if timesRolled == 2 then 
+                if timesRolled == 2  and (diea ~= dieb)then 
                     turn = false
                     turnText.alpha = 0
                     rolldice:setEnabled(false) 
                     timesRolled = 0 
-                    comms.sendinfo(player, "")
+                    comms.sendinfo(player, true)
                 else 
                     timesRolled = timesRolled + 1
                 end
@@ -297,6 +309,7 @@ local function roll( event )
             end 
             if (diea == dieb and diea ~= nil and not player.out) then
                 print("EXITPRISON")
+                rolldice:setEnabled(true)
                 timesRolled = 0
                 exitprison(player)
             end
@@ -333,8 +346,7 @@ function takePawnOut(event)
             pawnToTake = false
             selectPawn.isVisible = false
             selectPawn:setEnabled(false)
-            jailing = checkJailing(otherPlayers, player)
-            comms.sendinfo(player, jailing)
+            comms.sendinfo(player, true)
         end
     end
 end
@@ -426,6 +438,12 @@ local function processInfo()
                         turn = true
                         turnText.alpha = 1
                         rolldice:setEnabled(true)  
+                    elseif message.validmoves then 
+                        if tappedpawn ~= nil then 
+                            tappedpawn.validmoves = message.validmoves
+                            blockMessage = false
+                            paintTiles(tappedpawn)
+                        end
                     end
                     if message.jailedpawns ~= nil then 
                         if message.jailedpawns[player.playerid] ~= nil then 

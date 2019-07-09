@@ -39,7 +39,7 @@ chosencolour = ""
  
 -- create()
 function scene:create( event )
- 
+    
     local sceneGroup = self.view
     -- Code here runs when the scene is first created but has not yet appeared on screen
     local sceneGroup = self.view
@@ -74,7 +74,7 @@ end
  
 -- show()
 function scene:show( event )
- 
+    
     local sceneGroup = self.view
     local phase = event.phase
  
@@ -82,6 +82,7 @@ function scene:show( event )
         -- Code here runs when the scene is still off screen (but is about to come on screen)
  
     elseif ( phase == "did" ) then
+        comms.sendMessage(playerid)
         -- Code here runs when the scene is entirely on screen
  
     end

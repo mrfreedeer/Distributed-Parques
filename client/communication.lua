@@ -18,19 +18,26 @@ function communication.connect(serverAddress)
     end 
 end
 
+function wait()
+    print("----------------------------------------")
+end
+
 function communication.sendMessage(message)
     client:send(message)
 end
 
-function communication.sendinfo(player)
+function communication.sendinfo(player, endturn)
     local info = {}
     pawnpositions = '{'
     for i, pawn in ipairs(player) do
         if table.indexOf(pawnsOut, i) == nil then
-            if i ~= 4 then
-                pawnpositions  =  pawnpositions .. '"pawn'.. i ..'":'.. pawn.pos .. ', '
+            pawnpositions  =  pawnpositions .. '"pawn'.. i ..'":'
+            pawnpositions = pawnpositions .. '{"position":'.. pawn.pos
+            pawnpositions = pawnpositions .. ',"colour":"' .. pawn.colour .. '"'
+            if pawn.lap then 
+                pawnpositions = pawnpositions .. ', "lap": true}, '
             else 
-                pawnpositions  =  pawnpositions .. '"pawn'.. i ..'":'.. pawn.pos .. ', '
+                pawnpositions = pawnpositions .. ', "lap": false}, '
             end
         end
     end
@@ -38,6 +45,12 @@ function communication.sendinfo(player)
         pawnpositions = pawnpositions .. '"out": true'
     else 
         pawnpositions = pawnpositions .. '"out": false'
+    end
+
+    if endturn then 
+        pawnpositions = pawnpositions .. ', "endturn": true'
+    else 
+        pawnpositions = pawnpositions .. ', "updateposition": true'
     end
     pawnpositions = pawnpositions .. '}'
     client:send(pawnpositions)

@@ -7,6 +7,7 @@ from itertools import cycle
 from playermovement import *
 from jailing import *
 
+safespots = [1,13,20,25,37,44,49,61,68,73,85,92]
 players = {}
 availablecolours = ["red", "blue", "green", "yellow"]
 clients = {}
@@ -49,7 +50,7 @@ def grantTurn():
     waitingclient.send('{"turngranted":true}\n')
     
 
-def updatePosition():
+def updateInfo():
     pass
 
 class Receive(threading.Thread):
@@ -60,6 +61,7 @@ class Receive(threading.Thread):
             self.clientid = id
     def run(self):
         global isGameOn
+        global safespots
         while True:
            incoming = self.client.recv(1024)
            print "----->", incoming
@@ -78,32 +80,30 @@ class Receive(threading.Thread):
 
             else:
                 if "possibleMoves" in data:
-                    validmoves = possibleMoves(data["pawn"], data["dice"][0], data["dice"][1])
+                    pawn = players[self.clientid][data["pawn"]]
+                    validmoves = possibleMoves(pawn, data["dice"][0], data["dice"][1])
+                    print(pawn)
                     c.send(validmoves)
+                elif "updateposition" in data:
+                    regexresult = re.match('(.*?), "u',incoming).group()
+                    regexresult = regexresult[:-4]
+                    regexresult += '}'
+                    players[self.clientid] = json.loads(regexresult)
                 elif "endturn" in data:
-                    jailing = checkJailing(players, safespots, players[self.clientid])
-                    updatePosition(players[self.clientid], data["newpositions"])
-                    transition = createTransitionString(players[self.clientid], self.clientid)
-                    
-                    updateinfo = '{' + jailing +',' + transition + '}\n'
-                    
-                    c.send('{'+jailing+'}\n')
+                    if data["out"]:
+                        jailing = checkJailing(players, safespots, players[self.clientid])
+                        transition = createTransitionString(players[self.clientid], self.clientid)
+                        
+                        updateinfo = '{' + jailing +',' + transition + '}\n'
+                        
+                        c.send('{'+jailing+'}\n')
 
-                    for key, client in client.iteritems():
-                        if key != self.clientid: 
-                            client.send(updateinfo)
-                   """  if data["out"]:
-                        if data["jailedpawns"]["anyjailed"]:
-                            regexresult = re.match('(.*?), "j',incoming).group()
-                            regexresult = regexresult[:-4]
-                            transitionstring = '{"transition" : true, "jailedpawns":' + json.dumps(data["jailedpawns"]) +', "playerspositions": {"' + self.clientid +'": '+ regexresult +'}}}\n'
-                        else:
-                            transitionstring = '{"transition" : true, "playerspositions": {"' + self.clientid +'": '+ incoming +'}}\n'
-                        print transitionstring
-                        for key, client in clients.iteritems():
+                        for key, client in client.iteritems():
                             if key != self.clientid: 
-                                client.send(transitionstring)
-                    grantTurn() """
+                                client.send(updateinfo)
+                    grantTurn()
+               
+                   
                     
                    
 
@@ -124,13 +124,19 @@ while True:
         while not receivedcolours:
             c.send(colours)
             ack = c.recv(1024)
+            print("ACK: ", ack)
             if ack == "true":
                 playerid =c.recv(1024)
                 colour = c.recv(1024)
+                createdplayer = c.recv(1024)
+                createdplayer = json.loads(createdplayer)
+                players[playerid] = createdplayer
+                print(players)
                 chosencolours[playerid] = colour
                 availablecolours.remove(colour)
                 print("Current colours: ", availablecolours)
                 receivedcolours = True
+            
 
       
         for key, client in clients.iteritems():

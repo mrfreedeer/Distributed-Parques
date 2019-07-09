@@ -374,6 +374,7 @@ function board.drawboard(displaygroup, center )
 			posy = posy - diff
 		end
 		greenlimit = num - 1
+
 		return global, blackies
 end
 
