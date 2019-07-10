@@ -90,14 +90,16 @@ class Receive(threading.Thread):
                     players[self.clientid] = json.loads(regexresult)
                 elif "endturn" in data:
                     if data["out"]:
-                        jailing = checkJailing(players, safespots, players[self.clientid])
-                        transition = createTransitionString(players[self.clientid], self.clientid)
-                        
-                        updateinfo = '{' + jailing +',' + transition + '}\n'
                         regexresult = re.match('(.*?), "e',incoming).group()
                         regexresult = regexresult[:-4]
                         regexresult += '}'
                         players[self.clientid] = json.loads(regexresult)
+
+                        jailing = checkJailing(players, safespots, players[self.clientid])
+                        transition = createTransitionString(players[self.clientid], self.clientid)
+                        print("JAILING: ", jailing)
+                        updateinfo = '{' + jailing +',' + transition + '}\n'
+                        
                         self.client.send('{'+jailing+'}\n')
 
                         for key, client in clients.iteritems():

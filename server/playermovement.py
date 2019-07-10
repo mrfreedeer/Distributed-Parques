@@ -73,8 +73,8 @@ def possibleMoves(pawn, diea, dieb):
     return validmovestring
 
 def createTransitionString(player,playerid):
-    transtring = '{"'
-    transtring += playerid + '":'
+    transtring = '"transition":true, "playerspositions": {"'
+    transtring += playerid + '":{'
 
     for pawn, pawninfo in player.iteritems():
         if pawn not in ['out','endturn', 'updateposition']:
@@ -84,7 +84,7 @@ def createTransitionString(player,playerid):
     if transtring[-1:] == ',':
         transtring = transtring[:-1]
 
-    transtring += '}'
+    transtring += '}}'
     
     return transtring
         
