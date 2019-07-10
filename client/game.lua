@@ -203,19 +203,87 @@ function playertap(event)
         end
     end
 end 
+
+
 function movehorizontal(player, tile)
     transition.moveTo(player, {x = tile.x, 500})
 end
+
+
+function finishTurn(pawn)
+    comms.sendinfo(player, true)
+    turnText.alpha = 0
+    turn = false 
+    player.rolled = true
+    rolldice:setEnabled(false)
+end
+
+
 function tapListener(event)
+    print(table.indexOf(globalboard, event.target))
     if turn then 
+        pawn = tappedpawn
+        if pawn ~= nil and pawn.tapped and pawn.validmoves ~= nil then 
+            for _, cell in ipairs(pawn.validmoves) do 
+                if globalboard[cell] == event.target then 
+                    restoreColourBoard(pawn)
+                    tile = globalboard[cell]
+                    transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
+                    pawn.pos = cell 
+                    boardlib.enablelap(pawn)
+                    pawn.tapped = false 
+                    tappedpawn = nil 
+                    
+                    print('DD',diea, dieb,'DD')
+                    if pawn.validmoves[1] == cell and (diea ~= 0 and dieb ~= 0) then
+                        if not equaldice then 
+                            print("here")
+                            finishTurn(pawn)
+                         else 
+                             rolldice:setEnabled(true)
+                             comms.sendinfo(player, false)
+                         end
+                    else
+                        if pawn.validmoves[2] == cell then 
+                            diea = 0
+                        else 
+                            dieb = 0
+                        end 
+
+                        if diea == dieb and diea == 0 then 
+                            if not equaldice then 
+                                print("2.here")
+                               finishTurn(pawn)
+                            else 
+                                rolldice:setEnabled(true)
+                                comms.sendinfo(player, false)
+                            end
+                        else 
+                            rolldice:setEnabled(true)
+                            comms.sendinfo(player, false)
+                        end
+
+                    end
+                    if cell == 97 then 
+                        pawn:removeSelf()
+                    end
+                end
+
+            end
+            pawn.validmoves = {}
+        end 
+    end
+   
+
+    --[[ if turn then 
         pawn = tappedpawn
         if pawn ~= nil then
             if pawn.tapped and pawn.validmoves ~= nil then
                 for i, cell in ipairs(pawn.validmoves) do
+                    print("..",cell)
                     tile = globalboard[cell]
                     if (event.target == tile) then
                         transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
-                        comms.sendinfo(player,false)
                         pawn.pos = cell
                         restoreColourBoard(pawn)
                         pawn.tapped = false
@@ -233,6 +301,7 @@ function tapListener(event)
                         if diea == 0 and dieb == 0 then
                             if equaldice then
                                 rolldice:setEnabled(true)
+                                comms.sendinfo(player,false)
                                 player.rolled = false
                             else
                                 comms.sendinfo(player, true)
@@ -248,15 +317,18 @@ function tapListener(event)
                                 player.rolled = true
                             end
                             equaldice = false
+                        else 
+                            comms.sendinfo(player,false)
                         end
                         return true
                     end
                 end
             end
-        end
+        end 
 
         return false
     end
+    ]]
 end
 
 
@@ -439,6 +511,7 @@ local function processInfo()
                         turnText.alpha = 1
                         rolldice:setEnabled(true)  
                     elseif message.validmoves then 
+                        print("L-511.TAPPEDPAWN: ", tappedpawn)
                         if tappedpawn ~= nil then 
                             tappedpawn.validmoves = message.validmoves
                             blockMessage = false

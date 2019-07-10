@@ -81,22 +81,22 @@ function board.toCart(coords, center)
 	return {cx,cy}
 end
 
-function board.enablelap(player) 
-	if player.colour == "red" then
-		if player.pos>20 and not player.lap then
-			player.lap = true
+function board.enablelap(pawn) 
+	if pawn.colour == "red" then
+		if pawn.pos>20 and not pawn.lap then
+			pawn.lap = true
 		end
-	elseif player.colour == "yellow" then
-		if player.pos>44 and not player.lap then
-			player.lap = true
+	elseif pawn.colour == "yellow" then
+		if pawn.pos>44 and not pawn.lap then
+			pawn.lap = true
 		end
-	elseif player.colour == "blue" then
-		if player.pos>68 and not player.lap then
-			player.lap = true
+	elseif pawn.colour == "blue" then
+		if pawn.pos>68 and not pawn.lap then
+			pawn.lap = true
 		end
-	elseif player.colour == "yellow" then
-		if player.pos>92 and not player.lap then
-			player.lap = true
+	elseif pawn.colour == "yellow" then
+		if pawn.pos>92 and not pawn.lap then
+			pawn.lap = true
 		end
 	end
 end

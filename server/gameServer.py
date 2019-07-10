@@ -82,8 +82,7 @@ class Receive(threading.Thread):
                 if "possibleMoves" in data:
                     pawn = players[self.clientid][data["pawn"]]
                     validmoves = possibleMoves(pawn, data["dice"][0], data["dice"][1])
-                    print(pawn)
-                    c.send(validmoves)
+                    self.client.send(validmoves)
                 elif "updateposition" in data:
                     regexresult = re.match('(.*?), "u',incoming).group()
                     regexresult = regexresult[:-4]
@@ -95,10 +94,13 @@ class Receive(threading.Thread):
                         transition = createTransitionString(players[self.clientid], self.clientid)
                         
                         updateinfo = '{' + jailing +',' + transition + '}\n'
-                        
-                        c.send('{'+jailing+'}\n')
+                        regexresult = re.match('(.*?), "e',incoming).group()
+                        regexresult = regexresult[:-4]
+                        regexresult += '}'
+                        players[self.clientid] = json.loads(regexresult)
+                        self.client.send('{'+jailing+'}\n')
 
-                        for key, client in client.iteritems():
+                        for key, client in clients.iteritems():
                             if key != self.clientid: 
                                 client.send(updateinfo)
                     grantTurn()

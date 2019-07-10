@@ -20,7 +20,7 @@ def checkValidMoves(position, currentposition, colour, lap):
     landscapes = []
 
     if colour == "red":
-        landscapes =[[26,27],[50,61],[74,85]]
+        landscapes =[[26,37],[50,61],[74,85]]
     elif colour == "yellow":
         landscapes = [[1,13], [50,61], [74,85]]
     elif colour == "blue":
@@ -76,8 +76,10 @@ def createTransitionString(player,playerid):
     transtring = '{"'
     transtring += playerid + '":'
 
-    for pawn, position in player.iteritems():
-        transtring += '"' + pawn +'":' + position +','
+    for pawn, pawninfo in player.iteritems():
+        if pawn not in ['out','endturn', 'updateposition']:
+            print("\nPAWN:", str(pawn), "\nPOSITION:", pawninfo["position"])
+            transtring += '"' + str(pawn)+'":' + str(pawninfo["position"]) +','
     
     if transtring[-1:] == ',':
         transtring = transtring[:-1]

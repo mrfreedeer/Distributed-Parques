@@ -60,7 +60,7 @@ function communication.receiveInfo()
     
     local data, err = client:receive('*l')
     if data and not err then 
-        print(data)
+        print("INCOMING:\t",data)
         return data, true
     end
     return nil, false
