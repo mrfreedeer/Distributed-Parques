@@ -2,11 +2,14 @@ import socket
 import threading
 import json
 import time
+import random
 import re
+import operator
 from itertools import cycle 
 from playermovement import *
 from jailing import *
 
+stocknames = ["Panda", "Serpiente", "Oso", "Hormiga" ]
 safespots = [1,13,20,25,37,44,49,61,68,73,85,92]
 players = {}
 availablecolours = ["red", "blue", "green", "yellow"]
@@ -21,9 +24,10 @@ playernumber = 1
 maxplayers = False
 isGameOn = False
 clientpool = cycle(clientsid)
-
+startdicerolls = {}
 def getColours(availablecolours):
     colourstr = '{"colours": "'
+    
     for x in availablecolours:
         print x
         colourstr = colourstr + x + ","
@@ -45,7 +49,7 @@ def test(client):
 
 def grantTurn():
     clientid = next(clientpool)
-    print("Next: ", clientid)
+    print "Next: ", clientid 
     waitingclient = clients[clientid]
     grantstr = '{"turngranted":true,' 
     grantstr += '"playerid": "' + clientid + '"}\n'
@@ -73,13 +77,22 @@ class Receive(threading.Thread):
                 if not isGameOn:
                     if playernumber >= 3:
                         for key, client in clients.iteritems():
-                            client.send('{"startgame": true}\n')
-                        print("NOT IN FOR")
+                            rannumber = random.randint(1000000,10000000)
+                            client.send('{"startgame": true, "randomnum":' + str(rannumber) + '}\n')
                         isGameOn = True
-                        grantTurn()
+                       # grantTurn()
                     else:
                         self.client.send('{"waiting":true}\n')
-
+            elif "startroll" in data:
+                startdicerolls[self.clientid] = data["startroll"]
+                print len (startdicerolls), playernumber - 1, max(startdicerolls.iteritems(), key=operator.itemgetter(1))[0]
+                if  len (startdicerolls) == (playernumber - 1):
+                    starter = max(startdicerolls.iteritems(), key=operator.itemgetter(1))[0]
+                    while next(clientpool) != starter:
+                        pass
+                    grantstr = '{"turngranted":true,' 
+                    grantstr += '"playerid": "' + starter + '"}\n'
+                    clients[starter].send(grantstr)
             else:
                 if "possibleMoves" in data:
                     pawn = players[self.clientid][data["pawn"]]
@@ -99,7 +112,6 @@ class Receive(threading.Thread):
 
                         jailing = checkJailing(players, safespots, players[self.clientid])
                         transition = createTransitionString(players[self.clientid], self.clientid)
-                        print("JAILING: ", jailing)
                         updateinfo = '{' + jailing +',' + transition + '}\n'
                         
                         self.client.send('{'+jailing+'}\n')
@@ -126,21 +138,22 @@ while True:
         receivedcolours = False
         c, addr = servsocket.accept()
         colours = getColours(availablecolours)
-        print ("Connection from: ", addr)
+        print ('Connection from: ', addr)
         while not receivedcolours:
             c.send(colours)
             ack = c.recv(1024)
-            print("ACK: ", ack)
-            if ack == "true":
+            if ack == 'true':
                 playerid =c.recv(1024)
+                if playerid == '':
+                    playerid = stocknames[random.randint(0,3)]
+                    stocknames.remove(playerid)
                 colour = c.recv(1024)
                 createdplayer = c.recv(1024)
                 createdplayer = json.loads(createdplayer)
                 players[playerid] = createdplayer
-                print(players)
                 chosencolours[playerid] = colour
                 availablecolours.remove(colour)
-                print("Current colours: ", availablecolours)
+                print('Current colours: ', availablecolours)
                 receivedcolours = True
             
 

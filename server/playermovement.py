@@ -10,8 +10,6 @@ def check(position, currentposition, landscapes):
 
     fifthstatement = currentposition <= landscapes[1][0]+6 and secondstatement
     sixthstatement = currentposition <= landscapes[2][0]+6 and thirdstatement
-    print("1S: ", firststatement, "2S:", secondstatement, "3S", thirdstatement)
-    print("4S: ", fourthstatement, "5S:", fifthstatement, "6S", sixthstatement)
     if fourthstatement or fifthstatement or sixthstatement:
         return True 
     return False
@@ -83,7 +81,6 @@ def createTransitionString(player,playerid):
 
     for pawn, pawninfo in player.iteritems():
         if pawn not in ['out','endturn', 'updateposition']:
-            print("\nPAWN:", str(pawn), "\nPOSITION:", pawninfo["position"])
             transtring += '"' + str(pawn)+'":' + str(pawninfo["position"]) +','
     
     if transtring[-1:] == ',':
