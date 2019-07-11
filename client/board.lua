@@ -94,7 +94,7 @@ function board.enablelap(pawn)
 		if pawn.pos>68 and not pawn.lap then
 			pawn.lap = true
 		end
-	elseif pawn.colour == "yellow" then
+	elseif pawn.colour == "green" then
 		if pawn.pos>92 and not pawn.lap then
 			pawn.lap = true
 		end

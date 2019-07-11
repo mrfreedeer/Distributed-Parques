@@ -47,7 +47,9 @@ def grantTurn():
     clientid = next(clientpool)
     print("Next: ", clientid)
     waitingclient = clients[clientid]
-    waitingclient.send('{"turngranted":true}\n')
+    grantstr = '{"turngranted":true,' 
+    grantstr += '"playerid": "' + clientid + '"}\n'
+    waitingclient.send(grantstr)
     
 
 def updateInfo():

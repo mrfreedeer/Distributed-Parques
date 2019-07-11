@@ -3,37 +3,42 @@ def check(position, currentposition, landscapes):
     secondstatement = landscapes[1][0] <= position <= landscapes[1][1]
     thirdstatement = landscapes[2][0] <= position <= landscapes[2][1]
     
-    if landscapes[0][0] != 1:
+    if landscapes[0][0] != 2:
         fourthstatement = currentposition<=landscapes[0][0]+6 and firststatement
     else:
-        fourthstatement = currentposition<=96 and firststatement
+        fourthstatement = 86<=currentposition<=96 and firststatement
 
     fifthstatement = currentposition <= landscapes[1][0]+6 and secondstatement
     sixthstatement = currentposition <= landscapes[2][0]+6 and thirdstatement
-
+    print("1S: ", firststatement, "2S:", secondstatement, "3S", thirdstatement)
+    print("4S: ", fourthstatement, "5S:", fifthstatement, "6S", sixthstatement)
     if fourthstatement or fifthstatement or sixthstatement:
         return True 
     return False
 
 def checkValidMoves(position, currentposition, colour, lap):
-    home =[[10,20], [34,44], [58,68], [82,92]]
+    homepositions =[[10,20], [34,44], [58,68], [82,92]]
     landscapes = []
 
     if colour == "red":
         landscapes =[[26,37],[50,61],[74,85]]
+        home = homepositions[0]
     elif colour == "yellow":
-        landscapes = [[1,13], [50,61], [74,85]]
+        landscapes = [[2,13], [50,61], [74,85]]
+        home = homepositions[1]
     elif colour == "blue":
-        landscapes = [[1,13],[26,37],[74,85]]
+        landscapes = [[2,13],[26,37],[74,85]]
+        home = homepositions[2]
     elif colour == "green":
-        landscapes = [[1,13],[26,37],[50,61]]
+        landscapes = [[2,13],[26,37],[50,61]]
+        home = homepositions[3]
 
     print('p:', position, '||cp:', currentposition, '||col:', colour,'||lap:', lap)
     if check(position, currentposition, landscapes):
         return position + 7
-    elif (home[0][0] <= position <=home[0][1]) and lap:
+    elif (home[0] <= position <=home[1]) and lap:
         return position - 8
-    elif position == home[0][0] -1 and lap:
+    elif position == home[0] -1 and lap:
         return 97 
     else:
         return position

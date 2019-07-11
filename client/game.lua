@@ -180,7 +180,11 @@ function restoreColourPlayer(player)
 end
 
 function playertap(event)
+    --[[ print("___t", turn,"___p", table.indexOf(player, event.target))
+    print("___tap", event.target.tapped, "___out", event.target.out)
+    print("___Rolled: ", player.rolled) ]]
     if takePawn and player.out then 
+        print("TAKEPAWN")
         restoreColourPlayer(player)
         pawnToTake = event.target
         event.target:setFillColor(.35,.2,.86)
@@ -189,9 +193,12 @@ function playertap(event)
         for _,pawn in ipairs(player) do
             restoreColourBoard(pawn)
         end
-        event.target.tapped = true 
+        event.target.tapped = true
+        print("POINT A") 
         if event.target.out and player.out then
-            if player.rolled and not blockMessage then
+            print("POINT B: ", player.rolled, blockMessage)
+            if player.rolled and not blockMessage and not (diea == 0 and dieb == 0) then
+                print("--Roll info sent to server")
                 possiblestr = '"possibleMoves": true,'
                 pawnstr = '"pawn":' ..'"pawn' ..table.indexOf(player, event.target) .. '",'
                 dicestr = '"dice":[' .. diea ..',' .. dieb.. ']'
@@ -212,10 +219,13 @@ end
 
 function finishTurn(pawn)
     comms.sendinfo(player, true)
+    diea = nil 
+    dieb = nil
     turnText.alpha = 0
     turn = false 
     player.rolled = true
     rolldice:setEnabled(false)
+    print("-------------------------TURN FINISHES HERE-------------------------")
 end
 
 
@@ -225,6 +235,7 @@ function tapListener(event)
         pawn = tappedpawn
         if pawn ~= nil and pawn.tapped and pawn.validmoves ~= nil then 
             for _, cell in ipairs(pawn.validmoves) do 
+                
                 if globalboard[cell] == event.target then 
                     restoreColourBoard(pawn)
                     tile = globalboard[cell]
@@ -235,100 +246,54 @@ function tapListener(event)
                     tappedpawn = nil 
                     
                     print('DD',diea, dieb,'DD')
-                    if pawn.validmoves[1] == cell and (diea ~= 0 and dieb ~= 0) then
+                    if pawn.validmoves[1] == cell and (diea ~= 0 and dieb ~= 0) and (diea ~= nil and dieb~=nil) then
                         if not equaldice then 
-                            print("here")
+                            print("FINISH A")
                             finishTurn(pawn)
-                         else 
-                             rolldice:setEnabled(true)
-                             comms.sendinfo(player, false)
-                         end
+                        else 
+                            rolldice:setEnabled(true)
+                            comms.sendinfo(player, false)
+                        end
+                        diea = 0
+                        dieb = 0
+                        print('ADD',diea, dieb,'ADD')
                     else
-                        if pawn.validmoves[2] == cell then 
+                        if pawn.validmoves[2] == cell and diea ~= 0 then 
                             diea = 0
                         else 
                             dieb = 0
                         end 
 
                         if diea == dieb and diea == 0 then 
-                            if not equaldice then 
-                                print("2.here")
-                               finishTurn(pawn)
+                            if not equaldice then
+                                print("FINISH B")
+                                finishTurn(pawn)
                             else 
                                 rolldice:setEnabled(true)
+                                print("HERE-1")
                                 comms.sendinfo(player, false)
+                                equaldice = false
                             end
                         else 
-                            rolldice:setEnabled(true)
+                            rolldice:setEnabled(false)
+                            print("HERE-2 ")
                             comms.sendinfo(player, false)
+                            pawn.validmoves = nil
+                            return true
                         end
-
+                        print('ADD',diea, dieb,'ADD')
                     end
+                    
                     if cell == 97 then 
                         pawn:removeSelf()
                     end
                 end
 
             end
-            pawn.validmoves = {}
+            pawn.validmoves = nil
         end 
     end
-   
-
-    --[[ if turn then 
-        pawn = tappedpawn
-        if pawn ~= nil then
-            if pawn.tapped and pawn.validmoves ~= nil then
-                for i, cell in ipairs(pawn.validmoves) do
-                    print("..",cell)
-                    tile = globalboard[cell]
-                    if (event.target == tile) then
-                        transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
-                        pawn.pos = cell
-                        restoreColourBoard(pawn)
-                        pawn.tapped = false
-                        if cell == 97 then
-                            table.insert(pawnsToRemove, pawn)
-                        end
-                        if cell == pawn.validmoves[1] then
-                            diea = 0
-                            dieb = 0
-                        elseif cell == pawn.validmoves[2] then
-                            diea = 0
-                        else
-                            dieb = 0
-                        end 
-                        if diea == 0 and dieb == 0 then
-                            if equaldice then
-                                rolldice:setEnabled(true)
-                                comms.sendinfo(player,false)
-                                player.rolled = false
-                            else
-                                comms.sendinfo(player, true)
-                                for _, removePawn in ipairs(pawnsToRemove) do 
-                                    pawnindex = table.indexOf(player, removePawn)
-                                    table.remove(player, pawnindex)
-                                    removePawn:removeSelf()
-                                    table.insert(pawnsOut, pawnindex)
-                                end
-                                pawnsToRemove = {}
-                                turnText.alpha = 0
-                                turn = false 
-                                player.rolled = true
-                            end
-                            equaldice = false
-                        else 
-                            comms.sendinfo(player,false)
-                        end
-                        return true
-                    end
-                end
-            end
-        end 
-
-        return false
-    end
-    ]]
+    return false
 end
 
 
@@ -505,8 +470,9 @@ local function processInfo()
                 elseif start then 
                     if message.transition then 
                         otherPlayers = boardlib.transitionOtherPlayers(otherPlayers, message.playerspositions, globalboard)
-                    elseif message.turngranted then 
+                    elseif message.turngranted and message.playerid == player.playerid then 
                         print(message.turngranted)
+                        print("\n\n\n-------------------------TURN STARTS HERE-------------------------\n\n\n")
                         turn = true
                         turnText.alpha = 1
                         rolldice:setEnabled(true)  
@@ -527,6 +493,7 @@ local function processInfo()
                                     if pawn.pos == jailedpos then 
                                         pawn.out = false
                                         pawn.pos = boardlib.resetPos(player.colour)
+                                        pawn.lap = false
                                         otherhome = tellHomeColour(player)
                                         pawn.x = otherhome[1]
                                         pawn.y = otherhome[2]
