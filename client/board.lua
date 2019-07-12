@@ -60,8 +60,10 @@ function board.transitionOtherPlayers(otherPlayers, playerspositions, globalboar
 						pawn.pos = pawnpos
 					else 
 						pawnindex = table.indexOf(player, pawn)
-						table.remove(player, pawnindex)
-						pawn:removeSelf()
+						if pawnindex ~= nil then
+							table.remove(player, pawnindex)
+							pawn:removeSelf()
+						end
 					end
 				end
 		end
@@ -123,7 +125,7 @@ end
 function board.drawboard(displaygroup, center )
 		global =  {}
 		posx = 0 
-		posy = 65
+		posy = 125
 		diff = -12
 		num = 1
 		blackies = {}
@@ -146,7 +148,7 @@ function board.drawboard(displaygroup, center )
 			posy = posy + diff
 		
 		end
-		posy = 65
+		posy = 125
 		posx = posx-42
 		for i=1, 10 do
 			screenpos = board.toScreen({posx, posy}, center)

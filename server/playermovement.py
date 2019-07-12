@@ -6,7 +6,7 @@ def check(position, currentposition, landscapes):
     if landscapes[0][0] != 2:
         fourthstatement = currentposition<=landscapes[0][0]+6 and firststatement
     else:
-        fourthstatement = 86<=currentposition<=96 and firststatement
+        fourthstatement = (86<=currentposition<=96 or currentposition == 1) and firststatement
 
     fifthstatement = currentposition <= landscapes[1][0]+6 and secondstatement
     sixthstatement = currentposition <= landscapes[2][0]+6 and thirdstatement

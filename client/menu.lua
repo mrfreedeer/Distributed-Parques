@@ -81,7 +81,14 @@ local function serverInputListener( event )
         print( event.text )
     end
 end
-
+local function closeAlert( event )
+    if ( event.action == "clicked" ) then
+        local i = event.index
+        if ( i == 1 ) then
+            -- Do nothing; dialog will simply dismiss
+        end
+    end
+end
 
 local function nameInputListener( event )
  
@@ -91,11 +98,15 @@ local function nameInputListener( event )
     elseif ( event.phase == "ended" or event.phase == "submitted" ) then
         -- Output resulting text from "defaultField"
         playerid = event.target.text
-        print( event.target.text )
-        nameText.alpha = 0
-        serverText.alpha = 1
-        nameField.isVisible = false
-        serverField.isVisible = true 
+        if playerid == '' then 
+            alert = native.showAlert( "Nombre vacio", "El nombre no puede estar vacio", { "Aceptar" }, closeAlert )
+        else 
+            print( event.target.text )
+            nameText.alpha = 0
+            serverText.alpha = 1
+            nameField.isVisible = false
+            serverField.isVisible = true 
+        end
     elseif ( event.phase == "editing" ) then
         print( event.newCharacters )
         print( event.oldText )

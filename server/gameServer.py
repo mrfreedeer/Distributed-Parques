@@ -53,7 +53,12 @@ def grantTurn():
     waitingclient = clients[clientid]
     grantstr = '{"turngranted":true,' 
     grantstr += '"playerid": "' + clientid + '"}\n'
+    hasturnstr = '{"hasturn":"' + clientid +'"}\n' 
     waitingclient.send(grantstr)
+    for key, otherclient in clients.iteritems():
+        print "KEY: ", key, " CLIENTID:", clientid
+        if key != clientid: 
+            otherclient.send(hasturnstr) 
     
 
 def updateInfo():
@@ -93,6 +98,10 @@ class Receive(threading.Thread):
                     grantstr = '{"turngranted":true,' 
                     grantstr += '"playerid": "' + starter + '"}\n'
                     clients[starter].send(grantstr)
+                    hasturnstr = '{"hasturn":"' + starter +'"}\n' 
+                    for key, otherclient in clients.iteritems():
+                        if key != starter: 
+                            otherclient.send(hasturnstr) 
             else:
                 if "possibleMoves" in data:
                     pawn = players[self.clientid][data["pawn"]]

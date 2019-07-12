@@ -10,7 +10,8 @@ local scene = composer.newScene()
 local everything
 local boardlib = require "board"
 local widget = require "widget"
-
+local filename = "dice"
+local extension = ".png"
 local halfH = display.contentHeight * 0.5
 local halfW = display.contentWidth * 0.5
 local diea = nil
@@ -28,9 +29,10 @@ local tappedpawn = nil
 local pawnToTake = nil
 local blockMessage = false
 turnText = {}
+
 local otherPlayers = {}
 local equaldice = false
-testing = true
+testing = false
 pawnsOut = {}
 local jailedPawns = {}
 -----   Test Area ----------
@@ -42,15 +44,58 @@ local turn = testing
 local takePawn = false
 local pawnsToRemove = {}
 
-player.name ="lolita"
 player.out = false
 player.colour = chosencolour
 player.rolled = false
 player.hasExitedBefore = false
 player.playerid = playerid
+player.nametext = {}
 timesRolled = 0
 
 
+local function drawName( playername, colour, homecolour) 
+    if colour == 'red' then
+        nametext = display.newText(playername, homecolour[1] -20, homecolour[2] - 50, native.systemFont, 15 )
+    elseif colour == 'green' then
+        nametext = display.newText(playername, homecolour[1]-20, homecolour[2] - 50, native.systemFont, 15 )
+    elseif colour == 'yellow' then
+        nametext = display.newText(playername, homecolour[1] -20, homecolour[2] + 50, native.systemFont, 15 )
+    elseif colour == 'blue' then
+        nametext = display.newText(playername, homecolour[1] -20 , homecolour[2] + 50, native.systemFont, 15 )
+    end
+end
+
+local function resetTextColour(text)
+    text:setTextColor(1,1,1)
+end
+
+local function resetNameHighlight(otherPlayers)
+    for _, otherPlayer in ipairs(otherPlayers) do
+        resetTextColour(otherPlayer.nametext)
+    end
+end
+
+local function highlightName(player)
+    if player.colour == 'red' then
+        player.nametext:setTextColor(1,0,0)
+    elseif player.colour == 'green' then
+        player.nametext:setTextColor(0,1,0)
+    elseif player.colour == 'yellow' then
+        player.nametext:setTextColor(1,1,0)
+    elseif player.colour == 'blue' then
+        player.nametext:setTextColor(0,0,1)
+    end
+end
+
+local function highlightOtherPlayer(otherPlayers, hasturn)
+    for _, otherPlayer in ipairs(otherPlayers) do
+        if otherPlayer.playerid == hasturn then 
+            highlightName(otherPlayer)
+            return true
+        end
+    end
+    return false
+end
 
 function drawInJail(player, homecolour)
     player[1].x = homecolour[1]-20
@@ -61,6 +106,9 @@ function drawInJail(player, homecolour)
     player[3].y = homecolour[2]+20
     player[4].x = homecolour[1]+20
     player[4].y = homecolour[2]+20
+    print("::", player.colour, homecolour)
+    drawName(player.playerid,player.colour, homecolour)
+    player.nametext = nametext
 end
 
 function createplayer(player)
@@ -95,14 +143,13 @@ createplayer(player)
 
 local function paintTiles(pawn) 
     for i, cell in ipairs(pawn.validmoves) do
-        print(cell)
         globalboard[cell]:setFillColor(.35,.2,.86)
     end
 end
 
 local function exitprison(player) --Salir de la prision
 
-    print(player.name, " exitedprison")
+    print(player.playerid, " exitedprison")
     player.out = true
     if not player.hasExitedBefore then 
         for i, pawn in ipairs(player) do
@@ -180,9 +227,6 @@ function restoreColourPlayer(player)
 end
 
 function playertap(event)
-    --[[ print("___t", turn,"___p", table.indexOf(player, event.target))
-    print("___tap", event.target.tapped, "___out", event.target.out)
-    print("___Rolled: ", player.rolled) ]]
     if takePawn and player.out then 
         print("TAKEPAWN")
         restoreColourPlayer(player)
@@ -194,9 +238,7 @@ function playertap(event)
             restoreColourBoard(pawn)
         end
         event.target.tapped = true
-        print("POINT A") 
         if event.target.out and player.out then
-            print("POINT B: ", player.rolled, blockMessage)
             if player.rolled and not blockMessage and not (diea == 0 and dieb == 0) then
                 print("--Roll info sent to server")
                 possiblestr = '"possibleMoves": true,'
@@ -225,6 +267,7 @@ function finishTurn(pawn)
     turn = false 
     player.rolled = true
     rolldice:setEnabled(false)
+    player.nametext:setTextColor(1,1,1)
     print("-------------------------TURN FINISHES HERE-------------------------")
 end
 
@@ -245,10 +288,8 @@ function tapListener(event)
                     pawn.tapped = false 
                     tappedpawn = nil 
                     
-                    print('DD',diea, dieb,'DD')
                     if pawn.validmoves[1] == cell and (diea ~= 0 and dieb ~= 0) and (diea ~= nil and dieb~=nil) then
                         if not equaldice then 
-                            print("FINISH A")
                             finishTurn(pawn)
                         else 
                             rolldice:setEnabled(true)
@@ -256,7 +297,6 @@ function tapListener(event)
                         end
                         diea = 0
                         dieb = 0
-                        print('ADD',diea, dieb,'ADD')
                     else
                         if pawn.validmoves[2] == cell and diea ~= 0 then 
                             diea = 0
@@ -266,31 +306,31 @@ function tapListener(event)
 
                         if diea == dieb and diea == 0 then 
                             if not equaldice then
-                                print("FINISH B")
                                 finishTurn(pawn)
                             else 
                                 rolldice:setEnabled(true)
-                                print("HERE-1")
                                 comms.sendinfo(player, false)
                                 equaldice = false
                             end
                         else 
                             rolldice:setEnabled(false)
-                            print("HERE-2 ")
                             comms.sendinfo(player, false)
                             pawn.validmoves = nil
+                            if cell == 97 then 
+                                pawn:removeSelf()
+                            end
                             return true
                         end
-                        print('ADD',diea, dieb,'ADD')
                     end
                     
                     if cell == 97 then 
                         pawn:removeSelf()
                     end
+                    pawn.validmoves = nil
+                    return true
                 end
 
             end
-            pawn.validmoves = nil
         end 
     end
     return false
@@ -303,25 +343,41 @@ for i, pawn in ipairs(player) do
 end
 
 local function roll( event )
-    if turn then
-        local filename = "dice"
-        local extension = ".png"
-    
+
+    if startroll then 
         if ( "ended" == event.phase ) then
             diea=math.random(1,6)
             dieb=math.random(1,6)
             local rolleda = display.newImageRect(filename..diea..extension,50,50)
-            rolleda.x, rolleda.y = 50, 125
+            rolleda.x, rolleda.y = 50, 50
             local rolledb = display.newImageRect(filename..dieb..extension,50,50)
-            rolledb.x, rolledb.y = 100, 125
+            rolledb.x, rolledb.y = 100, 50
+
+            comms.sendMessage('{"startroll": '.. diea + dieb .. '}')
+            startroll = false
+            diea = nil
+            dieb = nil
+            rolldice:setEnabled(false)
+        end
+    elseif turn then
         
-            print("---", player.out, timesRolled)
+    
+        if ( "ended" == event.phase ) then
+            
+            diea=math.random(1,6)
+            dieb=math.random(1,6)
+            local rolleda = display.newImageRect(filename..diea..extension,50,50)
+            rolleda.x, rolleda.y = 50, 50
+            local rolledb = display.newImageRect(filename..dieb..extension,50,50)
+            rolledb.x, rolledb.y = 100, 50
+        
             if player.out then
                 if (diea == dieb) and (diea ~= nil) then
                     equaldice = true
                     timesRolled = timesRolled + 1
                 else 
                     timesRolled = 0
+                    equaldice = false
                 end
                 player.rolled = true
                 rolldice:setEnabled(false)
@@ -332,6 +388,7 @@ local function roll( event )
                     rolldice:setEnabled(false) 
                     timesRolled = 0 
                     comms.sendinfo(player, true)
+                    player.nametext:setTextColor(1,1,1)
                 else 
                     timesRolled = timesRolled + 1
                 end
@@ -342,7 +399,7 @@ local function roll( event )
                 takePawn = true
                 selectPawn.isVisible = true
                 selectPawn:setEnabled(true)
-                takealert = native.showAlert( "Felicidades", "Puede elegir una de tus fichas para sacarla del juego.", { "Elegir ficha" }, closeAlert )
+                takealert = native.showAlert( "Felicidades", "Puedes elegir una de tus fichas para sacarla del juego.", { "Elegir ficha" }, closeAlert )
             end 
             if (diea == dieb and diea ~= nil and not player.out) then
                 print("EXITPRISON")
@@ -350,6 +407,7 @@ local function roll( event )
                 timesRolled = 0
                 exitprison(player)
             end
+            print("TIMESROLLED: ", timesRolled)
         end
     end
 
@@ -363,7 +421,7 @@ local function sendStartGame(event)
     end
 end 
 
-local function onComplete( event )
+local function closeAlert( event )
     if ( event.action == "clicked" ) then
         local i = event.index
         if ( i == 1 ) then
@@ -387,6 +445,8 @@ function takePawnOut(event)
         end
     end
 end
+
+
 
 -- Boton creado (Tipo de Widget)
 rolldice = widget.newButton(
@@ -459,10 +519,14 @@ local function processInfo()
                         otherhomecolour = tellHomeColour(newPlayer)
                         drawInJail(newPlayer, otherhomecolour)
                     elseif message.startgame then 
+                        math.randomseed(message.randomnum)
                         print("START")
                         start = true 
                         otherplayersinfo = true 
                         startbutton.isVisible = false
+                        startroll = true 
+                        rolldice:setEnabled(true)
+                        rollalert = native.showAlert( "Tire los dados", "Tire los dados para determinar que jugador empieza", { "Tirar los dados" }, closeAlert )
                     elseif message.waiting then 
                         alert = native.showAlert( "Esperando", "Seguimos esperando a más jugadores.", { "OK" }, closeAlert )
                     end
@@ -470,14 +534,17 @@ local function processInfo()
                 elseif start then 
                     if message.transition then 
                         otherPlayers = boardlib.transitionOtherPlayers(otherPlayers, message.playerspositions, globalboard)
+                    elseif message.hasturn then 
+                        highlightOtherPlayer(otherPlayers, message.hasturn)
                     elseif message.turngranted and message.playerid == player.playerid then 
+                        resetNameHighlight(otherPlayers)
+                        highlightName(player)
                         print(message.turngranted)
                         print("\n\n\n-------------------------TURN STARTS HERE-------------------------\n\n\n")
                         turn = true
                         turnText.alpha = 1
                         rolldice:setEnabled(true)  
                     elseif message.validmoves then 
-                        print("L-511.TAPPEDPAWN: ", tappedpawn)
                         if tappedpawn ~= nil then 
                             tappedpawn.validmoves = message.validmoves
                             blockMessage = false
@@ -534,11 +601,11 @@ function scene:create(event)
 
     local sceneGroup = self.view
         
-    skypos = boardlib.toScreen({0,-70},center)
+    skypos = boardlib.toScreen({0,-14},center)
     sky = display.newCircle(skypos[1], skypos[2],30)
     sky:setFillColor(0,1,1)
     
-    homegenpos = {-99,32}
+    homegenpos = {-99,92}
     homeredpos = homegenpos
     homeredpos = boardlib.toScreen(homeredpos, center)
     homered = display.newRect(homeredpos[1], homeredpos[2], 72, 78)
@@ -551,26 +618,21 @@ function scene:create(event)
     homegreen.x = homegreenpos[1]
     homegreen.y = homegreenpos[2]
 
-    homegenpos = {-99,-172}
-    homebluepos = {homegenpos[1],homegenpos[2]}
-    homebluepos = boardlib.toScreen(homebluepos, center)
-    homeblue = display.newRect(homebluepos[1], homebluepos[2], 72, 78)
-    homeblue.x = homebluepos[1]
-    homeblue.y = homebluepos[2]
-
-    homegenpos = {-99,-172}
+    homegenpos = {-99,-112}
     homeyellowpos = {homegenpos[1],homegenpos[2]}
     homeyellowpos = boardlib.toScreen(homeyellowpos, center)
     homeyellow = display.newRect(homeyellowpos[1], homeyellowpos[2], 72, 78)
     homeyellow.x = homeyellowpos[1]
     homeyellow.y = homeyellowpos[2]
 
-    homegenpos = {-99,-172}
     homebluepos = {homegenpos[1]*-1,homegenpos[2]}
     homebluepos = boardlib.toScreen(homebluepos, center)
     homeblue = display.newRect(homebluepos[1], homebluepos[2], 72, 78)
     homeblue.x = homebluepos[1]
     homeblue.y = homebluepos[2]
+
+    
+
 
     homered:setFillColor(.61,0,0.59)
     homeblue:setFillColor(.61,0,0.59)
@@ -587,13 +649,11 @@ function scene:create(event)
     end
     homecolour = tellHomeColour(player)
     drawInJail(player, homecolour)
-
-
-
+   
     for i, pawn in ipairs(player) do
         pawn:toFront()
     end
-    turnText = display.newText(sceneGroup, "Su turno", display.contentCenterX + 15, display.contentCenterY - 100, native.systemFont, 20 )
+    turnText = display.newText(sceneGroup, "Su turno", display.contentCenterX + 15, homeredpos[2] - 150, native.systemFont, 20 )
     turnText.alpha = 0
     sceneGroup:insert(everything)
     
