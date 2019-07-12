@@ -6,6 +6,7 @@ import random
 import re
 import operator
 from itertools import cycle 
+from datetime import datetime
 from playermovement import *
 from jailing import *
 
@@ -25,6 +26,19 @@ maxplayers = False
 isGameOn = False
 clientpool = cycle(clientsid)
 startdicerolls = {}
+
+
+def timeAdjustment(timestring):
+    othertime = json.loads(timestring)
+    time = datetime.now().time()
+    print(time, "SERVERTIME")
+    diffstring = '{"hours": '
+    diffstring += str(time.hour - othertime["hours"]) + ', "minutes": '
+    diffstring += str(time.minute - othertime["minutes"]) + ', "seconds": '
+    diffstring += str(time.second - othertime["seconds"]) +'}\n'
+    
+    return diffstring
+
 def getColours(availablecolours):
     colourstr = '{"colours": "'
     
@@ -124,7 +138,7 @@ class Receive(threading.Thread):
                         updateinfo = '{' + jailing +',' + transition + '}\n'
                         
                         self.client.send('{'+jailing+'}\n')
-
+                        
                         for key, client in clients.iteritems():
                             if key != self.clientid: 
                                 client.send(updateinfo)
@@ -146,6 +160,10 @@ while True:
     if not maxplayers and not isGameOn:
         receivedcolours = False
         c, addr = servsocket.accept()
+        clientime = c.recv(1024)
+        print clientime 
+        c.send(timeAdjustment(clientime))
+        
         colours = getColours(availablecolours)
         print ('Connection from: ', addr)
         while not receivedcolours:

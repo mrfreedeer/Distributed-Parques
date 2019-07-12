@@ -66,4 +66,11 @@ function communication.receiveInfo()
     return nil, false
 end
 
+function communication.sendTime()
+    timestr ='{"hours":'
+    timestr = timestr .. time.hour .. ', '
+    timestr = timestr .. '"minutes":' .. time.min .. ', '
+    timestr = timestr .. '"seconds":' .. time.sec ..'}'
+    client:send(timestr)
+end
 return communication

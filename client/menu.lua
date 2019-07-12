@@ -34,12 +34,21 @@ end
 
 local function getStartupInfo()
     local data, incoming = comms.receiveInfo()
-    --print("---startup", data)
     if incoming then
         if data ~= nil then 
             message = json.decode(data)
             if not gotColours then
                 comms.sendMessage("false")
+
+                if message.hours ~= nil then 
+                    print("--Server adjustement: ", message.hours, message.minutes, message.seconds)
+                    print("--Local time before: ", time.hour, time.min, time.sec)
+                    time.hour = time.hour + message.hours 
+                    time.min = time.min + message.minutes
+                    time.sec = time.sec + message.seconds
+                    print("--Local time: ", time.hour, time.min, time.sec)
+                end
+
                 if message.colours ~= nil then 
                     gotColours = true
                     comms.sendMessage("true")
@@ -72,6 +81,7 @@ local function serverInputListener( event )
         if comms.connect(serverAddress) then
           startup = timer.performWithDelay(50, getStartupInfo, 0)
           event.target:removeSelf()
+          comms.sendTime()
         end
  
     elseif ( event.phase == "editing" ) then

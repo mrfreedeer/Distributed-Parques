@@ -20,18 +20,18 @@ function board.drawOtherPlayers(playercolour)
 		circlecolour = playercolour
 		if circlecolour == "red" then
 			circle.pos = 13
-			circle:setFillColor(1,0,0)
+			circle:setFillColor(unpack(red))
 		elseif circlecolour == "yellow" then 
 			circle.pos = 37
-			circle:setFillColor(1,1,0)
+			circle:setFillColor(unpack(yellow))
 		elseif circlecolour == "blue" then
-			circle:setFillColor(0,0,1)
+			circle:setFillColor(unpack(blue))
 			circle.pos = 61
 		elseif circlecolour == "green" then
-			circle:setFillColor(0,1,0)
+			circle:setFillColor(unpack(green))
 			circle.pos = 85
 		end
-		circle:setStrokeColor(.2,.2,.2)
+		circle:setStrokeColor(unpack(gray))
 		circle.strokeWidth = 1
 		table.insert(playerset, circle)
 		playerset.colour = circlecolour
@@ -136,12 +136,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 1 then
-				f:setStrokeColor( 1, 0, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor( unpack(red))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,1,1)
-				f:setFillColor(1,0,0)
+				f:setStrokeColor(unpack(white))
+				f:setFillColor(unpack(red))
 			end
 			table.insert(global, f)
 			
@@ -157,12 +157,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 5 then
-				f:setStrokeColor( 1, 0, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor( unpack(red))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,0,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(red))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posy = posy + diff
@@ -177,12 +177,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 2 then
-				f:setStrokeColor( 1, 0, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor( unpack(red))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,0,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(red))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posx = posx + diff
@@ -199,12 +199,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 1 then
-				f:setStrokeColor( 0, 0, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(1,1,0)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(yellow))
 			end
 			table.insert(global, f)
 			posx = posx - diff
@@ -220,12 +220,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 5 then
-				f:setStrokeColor( 1, 1, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(yellow))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,1,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(yellow))
+				f:setFillColor(unpack(white))
 			end
 			
 			table.insert(global, f)
@@ -240,12 +240,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 6 then
-				f:setStrokeColor( 1, 1, 0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(yellow))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,1,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(yellow))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posy = posy + diff
@@ -263,12 +263,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 1 then
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(1,1,1)
-				f:setFillColor(0,0,1)
+				f:setStrokeColor(unpack(white))
+				f:setFillColor(unpack(blue))
 			end
 			table.insert(global, f)
 			posy = posy - diff
@@ -282,12 +282,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 5 then
-				f:setStrokeColor(0,0,1)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(blue))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,0,1)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(blue))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posy = posy - diff
@@ -301,12 +301,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 2 then
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,0,1)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(blue))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posx = posx - diff
@@ -324,12 +324,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 1 then
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(0,1,0)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(green))
 			end
 			table.insert(global, f)
 			posx = posx + diff
@@ -345,12 +345,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 5 then
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,1,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(green))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posx = posx + diff
@@ -365,12 +365,12 @@ function board.drawboard(displaygroup, center )
 			f.number = num
 			num = num + 1
 			if i == 6 then
-				f:setStrokeColor(0,0,0)
-				f:setFillColor(.2,.2,.2)
+				f:setStrokeColor(unpack(black))
+				f:setFillColor(unpack(gray))
 				table.insert(blackies, num -1)
 			else
-				f:setStrokeColor(0,1,0)
-				f:setFillColor(1,1,1)
+				f:setStrokeColor(unpack(green))
+				f:setFillColor(unpack(white))
 			end
 			table.insert(global, f)
 			posy = posy - diff

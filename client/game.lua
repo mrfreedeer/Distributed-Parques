@@ -70,7 +70,7 @@ local function drawName( playername, colour, homecolour)
 end
 
 local function resetTextColour(text)
-    text:setTextColor(1,1,1)
+    text:setTextColor(unpack(white))
 end
 
 local function resetNameHighlight(otherPlayers)
@@ -81,13 +81,13 @@ end
 
 local function highlightName(player)
     if player.colour == 'red' then
-        player.nametext:setTextColor(1,0,0)
+        player.nametext:setTextColor(unpack(red))
     elseif player.colour == 'green' then
-        player.nametext:setTextColor(0,1,0)
+        player.nametext:setTextColor(unpack(green))
     elseif player.colour == 'yellow' then
-        player.nametext:setTextColor(1,1,0)
+        player.nametext:setTextColor(unpack(yellow))
     elseif player.colour == 'blue' then
-        player.nametext:setTextColor(0,0,1)
+        player.nametext:setTextColor(unpack(blue))
     end
 end
 
@@ -123,18 +123,18 @@ function createplayer(player)
        circle.colour = player.colour
         if player.colour == "red" then
             circle.pos = 13
-            circle:setFillColor(1,0,0)
+            circle:setFillColor(unpack(red))
         elseif player.colour == "yellow" then 
             circle.pos = 37
-            circle:setFillColor(1,1,0)
+            circle:setFillColor(unpack(yellow))
         elseif player.colour == "blue" then
-            circle:setFillColor(0,0,1)
+            circle:setFillColor(unpack(blue))
             circle.pos = 61
         elseif player.colour == "green" then
-            circle:setFillColor(0,1,0)
+            circle:setFillColor(unpack(green))
             circle.pos = 85
         end
-        circle:setStrokeColor(.2,.2,.2)
+        circle:setStrokeColor(unpack(gray))
         circle.strokeWidth = 1
         table.insert(player,circle)
     end
@@ -146,7 +146,7 @@ createplayer(player)
 
 local function paintTiles(pawn) 
     for i, cell in ipairs(pawn.validmoves) do
-        globalboard[cell]:setFillColor(.35,.2,.86)
+        globalboard[cell]:setFillColor(unpack(selectedTileColour))
     end
 end
 
@@ -195,20 +195,20 @@ function restoreColourBoard(pawn)
             if table.indexOf(blackies, cell) == nil then
                 colour = boardlib.tellColour(cell)
                 if colour == "solidred" then
-                    globalboard[cell]:setFillColor(1, 0, 0)
+                    globalboard[cell]:setFillColor(unpack(red))
                 elseif colour == "solidyellow" then
-                    globalboard[cell]:setFillColor(1,1,0)
+                    globalboard[cell]:setFillColor(unpack(yellow))
                 elseif colour == "solidblue" then 
-                    globalboard[cell]:setFillColor(0,0,1)
+                    globalboard[cell]:setFillColor(unpack(blue))
                 elseif colour == "solidgreen" then 
-                    globalboard[cell]:setFillColor(0,1,0)
+                    globalboard[cell]:setFillColor(unpack(green))
                 elseif colour == "cyan" then 
-                    globalboard[cell]:setFillColor(0,1,1)
+                    globalboard[cell]:setFillColor(unpack(cyan))
                 else 
-                    globalboard[cell]:setFillColor(1,1,1)
+                    globalboard[cell]:setFillColor(unpack(white))
                 end 
             else 
-                globalboard[cell]:setFillColor(.2,.2,.2)
+                globalboard[cell]:setFillColor(unpack(gray))
             end
 
         end
@@ -218,13 +218,13 @@ end
 function restoreColourPlayer(player)
     for _, pawn in ipairs(player) do
         if player.colour == "red" then
-            pawn:setFillColor(1,0,0)
+            pawn:setFillColor(unpack(red))
         elseif player.colour == "yellow" then 
-            pawn:setFillColor(1,1,0)
+            pawn:setFillColor(unpack(yellow))
         elseif player.colour == "blue" then
-            pawn:setFillColor(0,0,1)
+            pawn:setFillColor(unpack(blue))
         elseif player.colour == "green" then
-            pawn:setFillColor(0,1,0)
+            pawn:setFillColor(unpack(green))
         end
     end
 end
@@ -234,7 +234,7 @@ function playertap(event)
         print("TAKEPAWN")
         restoreColourPlayer(player)
         pawnToTake = event.target
-        event.target:setFillColor(.35,.2,.86)
+        event.target:setFillColor(unpack(selectedTileColour))
         event.target:toFront()
     elseif turn then
         for _,pawn in ipairs(player) do
@@ -277,7 +277,7 @@ function finishTurn(pawn)
     turn = false 
     player.rolled = true
     rolldice:setEnabled(false)
-    player.nametext:setTextColor(1,1,1)
+    player.nametext:setTextColor(unpack(white))
     removeDice()
 
     print("-------------------------TURN FINISHES HERE-------------------------")
@@ -406,7 +406,7 @@ local function roll( event )
                     rolldice:setEnabled(false) 
                     timesRolled = 0 
                     comms.sendinfo(player, true)
-                    player.nametext:setTextColor(1,1,1)
+                    player.nametext:setTextColor(unpack(white))
                     removeDice()
                 else 
                     timesRolled = timesRolled + 1
@@ -527,6 +527,7 @@ local function processInfo()
         if incoming then
             if data ~= nil then 
                 message = json.decode(data)
+
                 if not otherplayersinfo then
                     if message.newplayer ~=nil then
                         print("NEWPLAYER")
@@ -629,7 +630,7 @@ function scene:create(event)
         
     skypos = boardlib.toScreen({0,-14},center)
     sky = display.newCircle(skypos[1], skypos[2],30)
-    sky:setFillColor(0,1,1)
+    sky:setFillColor(unpack(cyan))
     
     homegenpos = {-99,92}
     homeredpos = homegenpos
@@ -660,10 +661,10 @@ function scene:create(event)
     
 
 
-    homered:setFillColor(.61,0,0.59)
-    homeblue:setFillColor(.61,0,0.59)
-    homegreen:setFillColor(.61,0,0.59)
-    homeyellow:setFillColor(.61,0,0.59)
+    homered:setFillColor(unpack(colourForHome))
+    homeblue:setFillColor(unpack(colourForHome))
+    homegreen:setFillColor(unpack(colourForHome))
+    homeyellow:setFillColor(unpack(colourForHome))
 
     -- Se dibuja el tablero
     everything = display.newGroup()
