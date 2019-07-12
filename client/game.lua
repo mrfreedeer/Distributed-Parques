@@ -15,6 +15,8 @@ local extension = ".png"
 local halfH = display.contentHeight * 0.5
 local halfW = display.contentWidth * 0.5
 local diea = nil
+local rolleda = {}
+local rolledb = {}
 local dieb = nil
 local movespeed = 1
 local center = {halfW, halfH}
@@ -28,8 +30,10 @@ local blackies = {}
 local tappedpawn = nil
 local pawnToTake = nil
 local blockMessage = false
+dicePictures = {}
 turnText = {}
-
+throwdiceText = {}
+hasturnText = {}
 local otherPlayers = {}
 local equaldice = false
 testing = false
@@ -106,7 +110,6 @@ function drawInJail(player, homecolour)
     player[3].y = homecolour[2]+20
     player[4].x = homecolour[1]+20
     player[4].y = homecolour[2]+20
-    print("::", player.colour, homecolour)
     drawName(player.playerid,player.colour, homecolour)
     player.nametext = nametext
 end
@@ -258,6 +261,13 @@ function movehorizontal(player, tile)
     transition.moveTo(player, {x = tile.x, 500})
 end
 
+function removeDice()
+    for _, diceobject in ipairs(dicePictures) do  
+        diceobject.isVisible = false
+        diceobject:removeSelf()
+    end
+    dicePictures = {}
+end
 
 function finishTurn(pawn)
     comms.sendinfo(player, true)
@@ -268,6 +278,8 @@ function finishTurn(pawn)
     player.rolled = true
     rolldice:setEnabled(false)
     player.nametext:setTextColor(1,1,1)
+    removeDice()
+
     print("-------------------------TURN FINISHES HERE-------------------------")
 end
 
@@ -311,6 +323,7 @@ function tapListener(event)
                                 rolldice:setEnabled(true)
                                 comms.sendinfo(player, false)
                                 equaldice = false
+                                throwdiceText.alpha = 1
                             end
                         else 
                             rolldice:setEnabled(false)
@@ -343,15 +356,18 @@ for i, pawn in ipairs(player) do
 end
 
 local function roll( event )
-
+        
     if startroll then 
         if ( "ended" == event.phase ) then
             diea=math.random(1,6)
             dieb=math.random(1,6)
-            local rolleda = display.newImageRect(filename..diea..extension,50,50)
+            rolleda = display.newImageRect(filename..diea..extension,50,50)
             rolleda.x, rolleda.y = 50, 50
-            local rolledb = display.newImageRect(filename..dieb..extension,50,50)
+            rolledb = display.newImageRect(filename..dieb..extension,50,50)
             rolledb.x, rolledb.y = 100, 50
+            table.insert(dicePictures, rolleda)
+            table.insert(dicePictures, rolledb)
+
 
             comms.sendMessage('{"startroll": '.. diea + dieb .. '}')
             startroll = false
@@ -366,11 +382,13 @@ local function roll( event )
             
             diea=math.random(1,6)
             dieb=math.random(1,6)
-            local rolleda = display.newImageRect(filename..diea..extension,50,50)
+            rolleda = display.newImageRect(filename..diea..extension,50,50)
             rolleda.x, rolleda.y = 50, 50
-            local rolledb = display.newImageRect(filename..dieb..extension,50,50)
+            rolledb = display.newImageRect(filename..dieb..extension,50,50)
             rolledb.x, rolledb.y = 100, 50
-        
+            table.insert(dicePictures, rolleda)
+            table.insert(dicePictures, rolledb)
+            throwdiceText.alpha = 0
             if player.out then
                 if (diea == dieb) and (diea ~= nil) then
                     equaldice = true
@@ -389,6 +407,7 @@ local function roll( event )
                     timesRolled = 0 
                     comms.sendinfo(player, true)
                     player.nametext:setTextColor(1,1,1)
+                    removeDice()
                 else 
                     timesRolled = timesRolled + 1
                 end
@@ -520,6 +539,8 @@ local function processInfo()
                         drawInJail(newPlayer, otherhomecolour)
                     elseif message.startgame then 
                         math.randomseed(message.randomnum)
+                        removeDice()
+
                         print("START")
                         start = true 
                         otherplayersinfo = true 
@@ -534,15 +555,20 @@ local function processInfo()
                 elseif start then 
                     if message.transition then 
                         otherPlayers = boardlib.transitionOtherPlayers(otherPlayers, message.playerspositions, globalboard)
-                    elseif message.hasturn then 
+                    elseif message.hasturn then
+                        removeDice()
                         highlightOtherPlayer(otherPlayers, message.hasturn)
+                        hasturnText.text = message.hasturn .. ' tiene el turno'
+                        hasturnText.alpha = 1
                     elseif message.turngranted and message.playerid == player.playerid then 
                         resetNameHighlight(otherPlayers)
                         highlightName(player)
                         print(message.turngranted)
                         print("\n\n\n-------------------------TURN STARTS HERE-------------------------\n\n\n")
                         turn = true
+                        hasturnText.alpha = 0
                         turnText.alpha = 1
+                        throwdiceText.alpha = 1
                         rolldice:setEnabled(true)  
                     elseif message.validmoves then 
                         if tappedpawn ~= nil then 
@@ -653,8 +679,13 @@ function scene:create(event)
     for i, pawn in ipairs(player) do
         pawn:toFront()
     end
-    turnText = display.newText(sceneGroup, "Su turno", display.contentCenterX + 15, homeredpos[2] - 150, native.systemFont, 20 )
-    turnText.alpha = 0
+    turnText = display.newText(sceneGroup, "Tu turno", display.contentCenterX, homeredpos[2] - 170, native.systemFont, 20 )
+    hasturnText = display.newText(sceneGroup, " tiene el turno", display.contentCenterX, homeredpos[2] - 145, native.systemFont, 20 )
+    throwdiceText = display.newText(sceneGroup, "Puedes lanzar los dados", display.contentCenterX, homeredpos[2] - 145, native.systemFont, 20 )
+
+    turnText.alpha = 0 
+    hasturnText.alpha = 0
+    throwdiceText.alpha = 0
     sceneGroup:insert(everything)
     
 end
