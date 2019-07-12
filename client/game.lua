@@ -1,6 +1,6 @@
 -----------------------------------------------------------------------------------------
 --
--- main.lua
+-- game.lua
 --
 -----------------------------------------------------------------------------------------
 
@@ -18,13 +18,9 @@ local diea = nil
 local rolleda = {}
 local rolledb = {}
 local dieb = nil
-local movespeed = 1
 local center = {halfW, halfH}
 local globalboard
 local blackies
-local yellowlimit = 48
-local bluelimit = 72
-local greenlimit = 96
 local player = {}
 local blackies = {}
 local tappedpawn = nil
@@ -37,8 +33,6 @@ hasturnText = {}
 local otherPlayers = {}
 local equaldice = false
 testing = false
-pawnsOut = {}
-local jailedPawns = {}
 -----   Test Area ----------
 ----------------------------
 local otherplayersinfo = testing
@@ -46,7 +40,6 @@ local start = testing
 local turn = testing 
 ----------------------------
 local takePawn = false
-local pawnsToRemove = {}
 
 player.out = false
 player.colour = chosencolour

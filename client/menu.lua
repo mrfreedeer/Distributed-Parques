@@ -3,7 +3,6 @@
 local composer = require("composer")
 local scene = composer.newScene()
 local gotColours = false
-local gotId = false
 local startup = {}
 nameField = {}
 nameText = {}

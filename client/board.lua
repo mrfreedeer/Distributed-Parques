@@ -51,22 +51,24 @@ function board.transitionOtherPlayers(otherPlayers, playerspositions, globalboar
 	local pawnstring = "pawn"
 	for _, player in ipairs(otherPlayers) do
 			positions = playerspositions[player.playerid]
-			for i, pawn in ipairs(player) do 
-				pawnpos = positions[pawnstring..i]
-				if pawnpos ~= nil then
-					if pawnpos ~= 97 then
-						tile = globalboard[pawnpos]
-						transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
-						pawn.pos = pawnpos
-					else 
-						pawnindex = table.indexOf(player, pawn)
-						if pawnindex ~= nil then
-							table.remove(player, pawnindex)
-							pawn:removeSelf()
+			if positions ~= nil then
+				for i, pawn in ipairs(player) do 
+					pawnpos = positions[pawnstring..i]
+					if pawnpos ~= nil then
+						if pawnpos ~= 97 then
+							tile = globalboard[pawnpos]
+							transition.moveTo(pawn, {y = tile.y, 500, transition=easing.inOutExpo, onComplete = movehorizontal(pawn, tile)})
+							pawn.pos = pawnpos
+						else 
+							pawnindex = table.indexOf(player, pawn)
+							if pawnindex ~= nil then
+								table.remove(player, pawnindex)
+								pawn:removeSelf()
+							end
 						end
 					end
 				end
-		end
+			end
 	end
 	return otherPlayers
 end

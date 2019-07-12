@@ -10,7 +10,6 @@ from datetime import datetime
 from playermovement import *
 from jailing import *
 
-stocknames = ["Panda", "Serpiente", "Oso", "Hormiga" ]
 safespots = [1,13,20,25,37,44,49,61,68,73,85,92]
 players = {}
 availablecolours = ["red", "blue", "green", "yellow"]
@@ -18,8 +17,6 @@ clients = {}
 clientsid = []
 chosencolours = {}
 receivedcolours = False
-transitiontest = '{"transition":true, "playerspositions": {"player1": {"pawn1": 22 , "pawn2": 56, "pawn3": 65 , "pawn4": 55}, "player2": {"pawn1": 13 , "pawn2": 13, "pawn3": 13 , "pawn4": 13}}}\n'
-jailedtest = '{"jailedpawns": {"player2": [70]}}\n'
 playerstring = "player"
 playernumber = 1
 maxplayers = False
@@ -48,19 +45,6 @@ def getColours(availablecolours):
     colourstr = colourstr[:-1]      
     return colourstr + '"}\n'
 
-def test(client):
-    print "TESTING"
-    newplayerstring ='{"newplayer":true, "playerid" : "player2", "colour" : "blue"}\n'
-    client.send(newplayerstring)
-    time.sleep(.2)
-    client.send('{"startgame":true}\n')
-    time.sleep(.2)
-    client.send(transitiontest)
-    time.sleep(1)
-    client.send('{"turngranted":true}\n')
-    #client.send(jailedtest)
-    
-
 def grantTurn():
     clientid = next(clientpool)
     print "Next: ", clientid 
@@ -87,6 +71,7 @@ class Receive(threading.Thread):
     def run(self):
         global isGameOn
         global safespots
+        global maxplayers
         while True:
            incoming = self.client.recv(1024)
            print "----->", incoming
@@ -99,7 +84,6 @@ class Receive(threading.Thread):
                             rannumber = random.randint(1000000,10000000)
                             client.send('{"startgame": true, "randomnum":' + str(rannumber) + '}\n')
                         isGameOn = True
-                       # grantTurn()
                     else:
                         self.client.send('{"waiting":true}\n')
             elif "startroll" in data:
@@ -193,11 +177,14 @@ while True:
 
         #test(c)
         playernumber += 1
+        if playernumber >= 5:
+            maxplayers = True
         clients[playerid]= c
         clientsid.append(playerid)
 
         t = Receive(c,addr, playerid)
         t.start()
+    
 
 
 
