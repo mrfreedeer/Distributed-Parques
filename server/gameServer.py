@@ -28,7 +28,6 @@ startdicerolls = {}
 def timeAdjustment(timestring):
     othertime = json.loads(timestring)
     time = datetime.now().time()
-    print(time, "SERVERTIME")
     diffstring = '{"hours": '
     diffstring += str(time.hour - othertime["hours"]) + ', "minutes": '
     diffstring += str(time.minute - othertime["minutes"]) + ', "seconds": '
@@ -40,7 +39,6 @@ def getColours(availablecolours):
     colourstr = '{"colours": "'
     
     for x in availablecolours:
-        print x
         colourstr = colourstr + x + ","
     colourstr = colourstr[:-1]      
     return colourstr + '"}\n'
@@ -54,7 +52,6 @@ def grantTurn():
     hasturnstr = '{"hasturn":"' + clientid +'"}\n' 
     waitingclient.send(grantstr)
     for key, otherclient in clients.iteritems():
-        print "KEY: ", key, " CLIENTID:", clientid
         if key != clientid: 
             otherclient.send(hasturnstr) 
     
@@ -88,7 +85,6 @@ class Receive(threading.Thread):
                         self.client.send('{"waiting":true}\n')
             elif "startroll" in data:
                 startdicerolls[self.clientid] = data["startroll"]
-                print len (startdicerolls), playernumber - 1, max(startdicerolls.iteritems(), key=operator.itemgetter(1))[0]
                 if  len (startdicerolls) == (playernumber - 1):
                     starter = max(startdicerolls.iteritems(), key=operator.itemgetter(1))[0]
                     while next(clientpool) != starter:
@@ -145,7 +141,6 @@ while True:
         receivedcolours = False
         c, addr = servsocket.accept()
         clientime = c.recv(1024)
-        print clientime 
         c.send(timeAdjustment(clientime))
         
         colours = getColours(availablecolours)
@@ -175,7 +170,6 @@ while True:
             client.send(newplayerstring)
             c.send(allplayersforclient)
 
-        #test(c)
         playernumber += 1
         if playernumber >= 5:
             maxplayers = True

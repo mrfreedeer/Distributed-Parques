@@ -82,6 +82,7 @@ local function serverInputListener( event )
           event.target:removeSelf()
           comms.sendTime()
         end
+
  
     elseif ( event.phase == "editing" ) then
         print( event.newCharacters )

@@ -31,7 +31,6 @@ def checkValidMoves(position, currentposition, colour, lap):
         landscapes = [[2,13],[26,37],[50,61]]
         home = homepositions[3]
 
-    print('p:', position, '||cp:', currentposition, '||col:', colour,'||lap:', lap)
     if check(position, currentposition, landscapes):
         return position + 7
     elif (home[0] <= position <=home[1]) and lap:

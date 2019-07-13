@@ -32,7 +32,7 @@ throwdiceText = {}
 hasturnText = {}
 local otherPlayers = {}
 local equaldice = false
-testing = false
+testing = true
 -----   Test Area ----------
 ----------------------------
 local otherplayersinfo = testing
@@ -131,7 +131,6 @@ function createplayer(player)
         circle.strokeWidth = 1
         table.insert(player,circle)
     end
-    print("sending info")
     comms.sendinfo(player, false)
 end
 
@@ -145,7 +144,6 @@ end
 
 local function exitprison(player) --Salir de la prision
 
-    print(player.playerid, " exitedprison")
     player.out = true
     if not player.hasExitedBefore then 
         for i, pawn in ipairs(player) do
@@ -426,14 +424,7 @@ local function roll( event )
 end
  
 
-
-local function sendStartGame(event)
-    if ( "ended" == event.phase ) then
-        comms.sendMessage('{"start": true}')
-    end
-end 
-
-local function closeAlert( event )
+function closeAlert( event )
     if ( event.action == "clicked" ) then
         local i = event.index
         if ( i == 1 ) then
@@ -441,6 +432,13 @@ local function closeAlert( event )
         end
     end
 end
+
+local function sendStartGame(event)
+    if ( "ended" == event.phase ) then
+        comms.sendMessage('{"start": true}')
+    end
+end 
+
 
 
 function takePawnOut(event)
@@ -620,8 +618,8 @@ local s_loop = timer.performWithDelay(50, processInfo, -1)
 function scene:create(event)
 
     local sceneGroup = self.view
-        
-    skypos = boardlib.toScreen({0,-14},center)
+    display.setDefault("background", unpack(bckgcolour))    
+    skypos = boardlib.toScreen({0,-10},center)
     sky = display.newCircle(skypos[1], skypos[2],30)
     sky:setFillColor(unpack(cyan))
     

@@ -315,7 +315,6 @@ function board.drawboard(displaygroup, center )
 		end
 		bluelimit = num - 1
 		--Aqui empiezan las verdes
-		--print("Green", bluelimit)
 		posx = posx + diff
 		refx = posx 
 		posy = posy + 42
